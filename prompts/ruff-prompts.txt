@@ -1,0 +1,2 @@
+AI: Gemini 1.5 Pro
+Prompt: How can I configure my vs code IDE to be sure that I'm following pep8?

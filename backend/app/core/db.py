@@ -11,6 +11,7 @@ from app.models import Passenger, User, UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
+
 def init_db(session: Session) -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create

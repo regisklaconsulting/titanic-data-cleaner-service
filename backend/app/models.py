@@ -11,9 +11,11 @@ from pydantic import EmailStr, field_validator, model_validator
 def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
 
+
 ## =================================
 ## App Data Models (ftom template)
 ## =================================
+
 
 # Shared properties
 class UserBase(SQLModel):
@@ -71,6 +73,7 @@ class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
 
+
 # Shared properties
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
@@ -112,7 +115,6 @@ class ItemsPublic(SQLModel):
     count: int
 
 
-
 # JSON payload containing access token
 class Token(SQLModel):
     access_token: str
@@ -128,6 +130,7 @@ class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
 
+
 # Generic message
 class Message(SQLModel):
     message: str
@@ -137,6 +140,7 @@ class Message(SQLModel):
 ## Business Data model
 ## =====================
 
+
 # Shared properties
 class PassengerBase(SQLModel):
     # Weather Survived or not: 0 = No, 1 = Yes
@@ -144,12 +148,11 @@ class PassengerBase(SQLModel):
 
     # Ticket class: 1 = 1st, 2 = 2nd, 3 = 3rd
     pclass: int = Field(default=None)
-    
+
     name: str = Field(default=None)
 
     # The title extracted from the name
     extracted_title: Optional[str] = Field(default=None)
-
 
     sex: str = Field(default=None)
     age: int = Field(default=None)
@@ -176,7 +179,8 @@ class PassengerBase(SQLModel):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
 
-# Strict validation for API requests 
+
+# Strict validation for API requests
 class PassengerCreate(PassengerBase):
     passenger_id: int = Field(primary_key=True)
 
@@ -204,7 +208,7 @@ class PassengerCreate(PassengerBase):
         if len(cleaned) < 3 or len(cleaned) > 50:
             raise ValueError("Name must be between 3 and 50 characters.")
         return cleaned.title()
-    
+
     @model_validator(mode="after")
     def extract_title_from_name(self) -> "PassengerCreate":
         """We don't validate the name here. We only extract the title if it exists."""
@@ -215,7 +219,7 @@ class PassengerCreate(PassengerBase):
         # \.?              -> Matches an optional period (e.g., "Mr." or "Mr")
         # \b              -> Word boundary (ensures "Mr" doesn't match "Mister")
         title_pattern = r"\b(Mr|Mrs|Ms|Dr)\.?\b"
-        
+
         # match = re.match(title_pattern, cleaned, re.IGNORECASE)
         match = re.search(title_pattern, cleaned, re.IGNORECASE)
 
@@ -223,11 +227,11 @@ class PassengerCreate(PassengerBase):
             extracted_title = match.group(1)
             extracted_title = extracted_title.capitalize()
 
-            # Normalization: 
+            # Normalization:
             # "Ms", "Mme", "Ms.", "Mme.", "Lady" => "Ms."
             # "Mr", "Mr.", "Sir" => "Mr."
             # "Ms.", "Mme.", "Lady" => "Mrs."
-            # ... 
+            # ...
 
             if extracted_title in ["Ms", "Ms.", "Mme", "Mme.", "Lady"]:
                 extracted_title = "Ms."
@@ -236,12 +240,11 @@ class PassengerCreate(PassengerBase):
             elif extracted_title in ["Mrs", "Mrs."]:
                 extracted_title = "Mrs."
             elif extracted_title in ["Dr", "Dr."]:
-                extracted_title = "Dr."    
+                extracted_title = "Dr."
 
             self.extracted_title = extracted_title
 
         return self
-    
 
 
 # 3. Clean database table (No heavy validation logic here)
@@ -252,5 +255,3 @@ class Passenger(PassengerBase, table=True):
 # Schema used for API responses
 class PassengerPublic(PassengerBase):
     passenger_id: int
-
-
