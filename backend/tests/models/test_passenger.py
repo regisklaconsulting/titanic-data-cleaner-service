@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+
 from app.models import PassengerCreate
 
 # === HAPPY PATH TESTS ===
@@ -7,6 +8,8 @@ from app.models import PassengerCreate
 
 def test_create_valid_passenger():
     """Ensure a perfectly valid passenger is instantiated and cleaned correctly."""
+
+    print("toto")
 
     # Use the PAssengerCreate model to guarantee the validators execution.
     passenger = PassengerCreate(
